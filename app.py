@@ -9,7 +9,7 @@ from utils import (
 )
 
 # ⛓️ Set your TMDB API key
-TMDB_API_KEY = st.secrets["tmdb"]["api_key"]  # 🔐 Replace with your real API key
+TMDB_API_KEY = "f2b4381c47b1e81c103225bdb5e41a22"  # 🔐 Replace with your real API key
 
 # 🎬 App title
 st.set_page_config(page_title="Hybrid Movie Recommender", layout="wide")

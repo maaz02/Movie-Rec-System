@@ -36,7 +36,7 @@ if st.button("Recommend"):
             with cols[i]:
                 if poster_url:
                     st.image(poster_url, use_container_width=True)
-            st.markdown(f"**{row['title']}**")
-            st.caption(f"⭐ {row['vote_average']}  | 🗳️ {row['vote_count']} votes")
+                st.markdown(f"**{row['title']}**")
+                st.caption(f"⭐ {row['vote_average']:.1f} &nbsp;&nbsp;💬 {row['vote_count']:,} votes", unsafe_allow_html=True)
     else:
         st.warning("Sorry, we couldn't find similar movies.")

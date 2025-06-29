@@ -1,10 +1,9 @@
-# utils.py
-
 import streamlit as st
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
 import requests
+import ast  # for safely parsing the genre JSON string
 
 @st.cache_data
 def load_data(movies_path='data/movie.csv', ratings_path='data/rating.csv'):
@@ -31,10 +30,32 @@ def hybrid_recommendation(movie_title, movies, similarity_matrix, top_n=10):
 
     idx = indices[movie_title]
     sim_scores = list(enumerate(similarity_matrix[idx]))
-    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)[1:top_n+1]
+    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)[1:]  # exclude itself
 
-    movie_indices = [i[0] for i in sim_scores]
-    return movies[['title', 'vote_average', 'vote_count']].iloc[movie_indices].reset_index(drop=True)
+    # Extract genres of the selected movie
+    try:
+        selected_genres = set(
+            g['name'] for g in ast.literal_eval(movies.iloc[idx]['genres'])
+        )
+    except:
+        selected_genres = set()
+
+    filtered = []
+    for i, score in sim_scores:
+        try:
+            movie_genres = set(
+                g['name'] for g in ast.literal_eval(movies.iloc[i]['genres'])
+            )
+        except:
+            movie_genres = set()
+
+        if selected_genres & movie_genres:  # at least one genre in common
+            filtered.append((i, score))
+        if len(filtered) >= top_n * 2:
+            break
+
+    top_indices = [i for i, _ in filtered[:top_n]]
+    return movies[['title', 'vote_average', 'vote_count', 'genres']].iloc[top_indices].reset_index(drop=True)
 
 def fetch_poster(title, api_key):
     try:

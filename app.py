@@ -1,6 +1,8 @@
 # app.py
 
 import streamlit as st
+import ast  # for safely parsing the genres field
+
 from utils import (
     load_data,
     generate_tfidf_and_similarity,
@@ -33,10 +35,21 @@ if st.button("Recommend"):
         cols = st.columns(5)
         for i, row in recommendations.iterrows():
             poster_url = fetch_poster(row['title'], TMDB_API_KEY)
+
+            # Safely extract genres
+            try:
+                genre_list = ast.literal_eval(row['genres'])
+                genre_str = ", ".join([g['name'] for g in genre_list])
+            except:
+                genre_str = "Unknown"
+
             with cols[i]:
                 if poster_url:
                     st.image(poster_url, use_container_width=True)
                 st.markdown(f"**{row['title']}**")
-                st.caption(f"⭐ {row['vote_average']:.1f} &nbsp;&nbsp;💬 {row['vote_count']:,} votes", unsafe_allow_html=True)
+                st.caption(
+                    f"⭐ {row['vote_average']:.1f} &nbsp;&nbsp;💬 {row['vote_count']:,} votes<br>🎞️ {genre_str}",
+                    unsafe_allow_html=True
+                )
     else:
         st.warning("Sorry, we couldn't find similar movies.")
